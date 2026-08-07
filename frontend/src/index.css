@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-deep: #0B1220;
+  --color-surface: #121B2E;
+  --color-border-subtle: #1F2A40;
+  --color-text-primary: #E4EAF2;
+  --color-text-muted: #7C8AA3;
+  --color-signal: #2AC9B5;
+  --color-critical: #F2545B;
+  --color-safe: #34D399;
+  --color-warning: #F5A524;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  background-color: var(--color-bg-deep);
+}
+
+/* Élément signature : barre lumineuse animée, symbolise la surveillance continue */
+@keyframes signal-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.signal-bar {
+  background-image: linear-gradient(90deg, transparent, #2AC9B5, transparent);
+  background-size: 200% 100%;
+  animation: signal-sweep 3s linear infinite;
+}
