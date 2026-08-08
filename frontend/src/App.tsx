@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import { getStatsSummary } from "./api";
 import type { StatsSummary } from "./types";
 import PulseHeader from "./components/PulseHeader";
-import StatsCards from "./components/StatsCards";
-import SourceChart from "./components/SourceChart";
-import UrlScanner from "./components/UrlScanner";
-import IndicatorsTable from "./components/IndicatorsTable";
+import NavBar from "./components/NavBar";
+import DashboardPage from "./pages/DashboardPage";
+import IndicatorsPage from "./pages/IndicatorsPage";
+import AlertsPage from "./pages/AlertsPage";
 
 const REFRESH_INTERVAL_MS = 20000;
 
@@ -32,14 +33,12 @@ function App() {
     <div className="min-h-screen bg-bg-deep font-body">
       <div className="max-w-6xl mx-auto px-6 py-10">
         <PulseHeader lastUpdated={lastUpdated} />
-        <StatsCards stats={stats} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-          <div className="lg:col-span-2">
-            <SourceChart stats={stats} />
-          </div>
-          <UrlScanner />
-        </div>
-        <IndicatorsTable />
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<DashboardPage stats={stats} />} />
+          <Route path="/indicators" element={<IndicatorsPage />} />
+          <Route path="/alerts" element={<AlertsPage />} />
+        </Routes>
       </div>
     </div>
   );

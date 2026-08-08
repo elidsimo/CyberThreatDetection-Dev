@@ -104,6 +104,18 @@ def get_stats_summary():
 
     return {"total_indicators": total, "by_source": by_source, "by_type": by_type}
 
+@app.get("/alerts")
+def get_alerts(limit: int = Query(default=20, le=100)):
+    """Liste l'historique des indicateurs déjà notifiés (email/Telegram, Étape 11)."""
+    es = get_es_client()
+    response = es.search(
+        index=INDEX_NAME,
+        query={"match": {"status": "alerted"}},
+        size=limit,
+        sort=[{"detected_at": "desc"}],
+    )
+    hits = [hit["_source"] for hit in response["hits"]["hits"]]
+    return {"count": len(hits), "results": hits}
 
 @app.post("/predict/phishing-url", response_model=URLPredictionResponse)
 def predict_phishing_url(request: URLPredictionRequest):

@@ -17,4 +17,6 @@ export const getIndicators = (params: Record<string, string | number> = {}) =>
 export const predictPhishingUrl = (url: string) =>
   api.post<PhishingPrediction>("/predict/phishing-url", { url }).then((res) => res.data);
 
+export const getAlerts = (limit: number = 20) =>
+  api.get<IndicatorsResponse>("/alerts", { params: { limit } }).then((res) => res.data);
 export default api;
