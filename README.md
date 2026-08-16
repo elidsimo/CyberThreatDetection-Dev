@@ -11,7 +11,27 @@ Pr. Fatima Zohra Ennaji (ENSA Khouribga).
 ---
 
 ## Architecture
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │ Collecteurs │──▶│ Elasticsearch│──▶│ dashboard-api│──▶│ Frontend │ │ (4 sources) │ │ + Kibana │ │ (FastAPI) │ │ (React) │ └──────────────┘ └──────────────┘ └──────┬───────┘ └──────────────┘ ▲ │ │ ▼ ┌───────┴──────┐ ┌──────────────┐ │ Scoring IA │ │ Modèles │ │ (phishing) │◀──│ Scikit-learn│ └───────┬──────┘ └──────────────┘ ▼ ┌──────────────┐ │ Moteur │──▶ Email + Telegram │ d'alerte │ └──────────────┘ ▲ ┌───────┴──────┐ │ Planificateur│ │ de tâches │ (toutes les 30 min, automatique) └──────────────┘
+
+```
+┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+│  Collecteurs  │────▶│ Elasticsearch │────▶│ dashboard-api │────▶│   Frontend    │
+│  (4 sources)  │     │   + Kibana    │     │   (FastAPI)   │     │    (React)    │
+└───────────────┘     └───────────────┘     └───────┬───────┘     └───────────────┘
+                                                     │
+                                                     ▼
+┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+│   Modèles     │────▶│  Scoring IA   │────▶│   Moteur      │──▶ Email + Telegram
+│ Scikit-learn  │     │  (phishing)   │     │  d'alerte     │
+└───────────────┘     └───────────────┘     └───────┬───────┘
+                                                     ▲
+                                             ┌───────┴───────┐
+                                             │ Planificateur │
+                                             │   de tâches   │
+                                             │ (toutes les   │
+                                             │ 30 min, auto) │
+                                             └───────────────┘
+```
+
 ## Stack technique
 
 | Composant | Technologies |
