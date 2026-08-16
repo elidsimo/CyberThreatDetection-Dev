@@ -15,41 +15,65 @@ INDEX_NAME = os.getenv("INDEX_NAME")
 
 # Seuil de score à partir duquel un indicateur déclenche une alerte
 SEVERITY_THRESHOLD = 90
-
+ML_CONFIDENCE_THRESHOLD = 0.90
 
 ALERT_LIMIT_PER_RUN = 5
 
 
 def fetch_indicators_to_alert(es):
-    """Récupère les indicateurs status=new avec un score >= seuil, non encore alertés."""
     response = es.search(
         index=INDEX_NAME,
         size=ALERT_LIMIT_PER_RUN,
         query={
             "bool": {
-                "must": [
-                    {"match": {"status": "new"}},
-                    {"range": {"severity_score": {"gte": SEVERITY_THRESHOLD}}},
-                ]
+                "must": [{"match": {"status": "new"}}],
+                "should": [
+                    {
+                        "bool": {
+                            "must": [
+                                {"terms": {"indicator_type": ["ip", "hash"]}},
+                                {"range": {"severity_score": {"gte": SEVERITY_THRESHOLD}}},
+                            ]
+                        }
+                    },
+                    {
+                        "bool": {
+                            "must": [
+                                {"match": {"indicator_type": "phishing_url"}},
+                                {"match": {"ml_prediction": "phishing"}},
+                                {"range": {"ml_confidence": {"gte": ML_CONFIDENCE_THRESHOLD}}},
+                            ]
+                        }
+                    },
+                ],
+                "minimum_should_match": 1,
             }
         },
         sort=[{"severity_score": "desc"}],
     )
     return response["hits"]["hits"]
 
-
 def build_alert_message(indicator):
     """Construit le texte de l'alerte à partir d'un document Elasticsearch."""
-    return (
-        f"🚨Nouvelle menace détectée — CyberThreat Detection\n\n"
-        f"Type : {indicator['indicator_type']}\n"
-        f"Valeur : {indicator['indicator_value']}\n"
-        f"Source : {indicator['source']}\n"
-        f"Score de sévérité : {indicator['severity_score']}/100\n"
-        f"Détecté le : {indicator['detected_at']}\n"
-        f"Description : {indicator['description']}"
-    )
+    lines = [
+        f"🚨 Nouvelle menace détectée — CyberThreat Detection",
+        "",
+        f"Type : {indicator['indicator_type']}",
+        f"Valeur : {indicator['indicator_value']}",
+        f"Source : {indicator['source']}",
+        f"Score de sévérité (source) : {indicator['severity_score']}/100",
+    ]
 
+    if "ml_prediction" in indicator:
+        lines.append(
+            f"Analyse IA : {indicator['ml_prediction']} "
+            f"(confiance {indicator['ml_confidence']*100:.1f}%)"
+        )
+
+    lines.append(f"Détecté le : {indicator['detected_at']}")
+    lines.append(f"Description : {indicator['description']}")
+
+    return "\n".join(lines)
 
 def mark_as_alerted(es, doc_id):
     """Met à jour le statut du document pour éviter une double notification."""
